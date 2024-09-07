@@ -1,5 +1,5 @@
-import { Global, Module } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
+import { Global, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import dbConfig from './db-config';
 
@@ -9,7 +9,7 @@ import dbConfig from './db-config';
     MongooseModule.forRootAsync({
       useFactory: (configService: ConfigType<typeof dbConfig>) => {
         const { db } = configService;
-        const uriDb = `mongodb+srv://${db.user}:${db.password}@uchuvalabs.8bz9q.mongodb.net/${db.name}?retryWrites=true&w=majority`
+        const uriDb = `mongodb+srv://${db.user}:${db.password}@uchuvalabs.8bz9q.mongodb.net/uchuvaLabs` 
         return {
           uri: uriDb,
         };

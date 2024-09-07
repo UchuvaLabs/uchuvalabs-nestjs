@@ -1,11 +1,8 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Types } from "mongoose";
+import { Document,Types } from 'mongoose';
 
-
-export type UserDocument = User & Document
-
-@Schema()
-export class User{
+@Schema({ timestamps: true })
+export class User extends Document{
     @Prop({
         required: true, 
         trim: true
@@ -44,6 +41,18 @@ export class User{
         default: 'pending'
     })
     status: string;
+
+    @Prop()
+    otp?: string;
+
+    @Prop()
+    otpExpiration?: number;
+
+    @Prop()
+    tempToken?: string;
+
+    @Prop()
+    tempTokenExpiration?: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)
