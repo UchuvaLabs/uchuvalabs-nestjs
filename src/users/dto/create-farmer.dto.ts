@@ -1,20 +1,25 @@
-import { IsArray, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 import { CreateUserDto } from './create-user.dto'; 
 
 export class CreateFarmerDto extends CreateUserDto {
     @IsString()
-    experiencia: string; 
+    @IsOptional()
+    experiencia?: string; 
 
     @IsArray()
-    certificaciones: string[]; 
+    @IsOptional()
+    certificaciones?: string[]; 
     @IsNumber()
-    areaTotalCultivable: number; 
+    @IsOptional()
+    areaTotalCultivable?: number; 
 
     @IsArray()
-    ubicacionesTierras: string[]; 
+    @IsOptional()
+    ubicacionesTierras?: string[]; 
 
     @IsArray()
-    historialCultivos: { 
+    @IsOptional()
+    historialCultivos?: { 
         cultivoId: string; 
         tipoCultivo: string; 
         fechaInicio: Date; 

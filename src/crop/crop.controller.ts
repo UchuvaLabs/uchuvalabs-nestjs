@@ -1,34 +1,53 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  Param,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CropService } from './crop.service';
 import { CreateCropDto } from './dto/create-crop.dto';
-import { UpdateCropDto } from './dto/update-crop.dto';
+import { UpdateCropStatusDto } from './dto/update-crop.dto';
+import { Crop } from './entities/crop.entity';
 
-@Controller('crop')
+@Controller('crops')
 export class CropController {
   constructor(private readonly cropService: CropService) {}
 
-  @Post()
-  create(@Body() createCropDto: CreateCropDto) {
-    return this.cropService.create(createCropDto);
+  @Post('create')
+  async createCrop(@Body() createCropDto: CreateCropDto): Promise<Crop> {
+    try {
+      return await this.cropService.createCrop(createCropDto);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
-  @Get()
-  findAll() {
-    return this.cropService.findAll();
+ 
+  @Get('review')
+  async getCropsForReview(): Promise<Crop[]> {
+    return await this.cropService.getCropsForReview();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cropService.findOne(+id);
+ 
+  @Patch('status')
+  async updateCropStatus(@Body() updateCropStatusDto: UpdateCropStatusDto): Promise<Crop> {
+    try {
+      return await this.cropService.updateCropStatus(updateCropStatusDto);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException('Proyecto no encontrado');
+      }
+      throw new BadRequestException('Error al actualizar el estado del proyecto');
+    }
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCropDto: UpdateCropDto) {
-    return this.cropService.update(+id, updateCropDto);
-  }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cropService.remove(+id);
+  @Get('accepted')
+  async getAcceptedCrops(): Promise<Crop[]> {
+    return await this.cropService.getAcceptedCrops();
   }
 }

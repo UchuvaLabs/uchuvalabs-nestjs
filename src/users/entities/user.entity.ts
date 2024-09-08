@@ -47,6 +47,35 @@ export class User extends Document{
 
     @Prop()
     tempTokenExpiration?: Date;
+
+
+    @Prop()
+    experiencia?: string; 
+ 
+    @Prop()
+    areaTotalCultivable?: number; 
+
+    @Prop()
+    ubicacionesTierras?: string[]; 
+
+    @Prop()
+    historialCultivos?: { 
+        cultivoId: string; 
+        tipoCultivo: string; 
+        fechaInicio: Date; 
+        fechaFin: Date;
+        resumen: string; 
+        rendimiento: number; 
+    }[];
+
+    @Prop()
+  capitalDisponible?: number;
+
+  @Prop()
+  areasInteres?: string[];
+
+  @Prop()
+  inversionesPrevias?: { proyecto: string; monto: number }[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)

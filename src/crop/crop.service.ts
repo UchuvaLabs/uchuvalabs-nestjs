@@ -1,26 +1,44 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { CreateCropDto } from './dto/create-crop.dto';
-import { UpdateCropDto } from './dto/update-crop.dto';
+
+import { Crop } from './entities/crop.entity';
+import { UpdateCropStatusDto } from './dto/update-crop.dto';
 
 @Injectable()
 export class CropService {
-  create(createCropDto: CreateCropDto) {
-    return 'This action adds a new crop';
+  constructor(
+    @InjectModel(Crop.name) private readonly cropModel: Model<Crop>,
+  ) {}
+
+  async createCrop(createCropDto: CreateCropDto): Promise<Crop> {
+    const crop = new this.cropModel(createCropDto);
+    return crop.save();
   }
 
-  findAll() {
-    return `This action returns all crop`;
+  async getCropsForReview(): Promise<Crop[]> {
+    return this.cropModel.find({ status: 'pendiente' }).exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} crop`;
-  }
+  async updateCropStatus(updateCropStatusDto: UpdateCropStatusDto): Promise<Crop> {
+    const { cropId, status } = updateCropStatusDto;
 
-  update(id: number, updateCropDto: UpdateCropDto) {
-    return `This action updates a #${id} crop`;
-  }
+    const crop = await this.cropModel.findById(cropId).exec();
+    if (!crop) {
+      throw new NotFoundException('Proyecto no encontrado');
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} crop`;
+    crop.status = status;
+    if (status === 'aceptado') {
+      crop.isPublished = true;
+    }
+    await crop.save();
+
+    return crop;
+  }
+  
+  async getAcceptedCrops(): Promise<Crop[]> {
+    return this.cropModel.find({ status: 'aceptado' }).exec();
   }
 }

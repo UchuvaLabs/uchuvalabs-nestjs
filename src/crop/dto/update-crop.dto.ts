@@ -1,4 +1,10 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateCropDto } from './create-crop.dto';
+import { IsString, IsEnum, IsNotEmpty } from 'class-validator';
+import { Types } from 'mongoose';
 
-export class UpdateCropDto extends PartialType(CreateCropDto) {}
+export class UpdateCropStatusDto {
+  @IsNotEmpty()
+  cropId: Types.ObjectId;
+
+  @IsEnum(['pendiente', 'aceptado'])
+  status: 'pendiente' | 'aceptado';
+}

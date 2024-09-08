@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { CreateUserDto } from './create-user.dto'; 
 
 export class CreateAgronomistDto extends CreateUserDto {
@@ -10,8 +10,10 @@ export class CreateAgronomistDto extends CreateUserDto {
     especializacion: string; 
 
     @IsArray()
-    areasExpertise: string[]; 
+    @IsOptional()
+    areasExpertise?: string[]; 
 
     @IsString()
-    certificaciones:string[]; 
+    @IsOptional()
+    certificaciones?:string[]; 
 }

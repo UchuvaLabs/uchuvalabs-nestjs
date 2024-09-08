@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateUserDto, Role } from './dto/create-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import * as crypto from 'crypto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './entities/user.entity';
 import { Model } from 'mongoose';
 import { HashService } from './hash.service';
-import { CreateInvestorDto } from './dto/create-investor.dto';
 import { CreateFarmerDto } from './dto/create-farmer.dto';
+import { CreateInvestorDto } from './dto/create-investor.dto';
 import { CreateAgronomistDto } from './dto/create-agronomist.dto';
 
 @Injectable()
@@ -27,64 +27,70 @@ export class UsersService {
     return this.userModel.findOne({ tempToken: token }).exec();
   }
   async register(createUserDto: CreateUserDto) {
-    const { email,  password, role } = createUserDto;
+    const { email,  password } = createUserDto;
     const user = await this.getUserByEmail(email)
     if(user){
       throw new BadRequestException('User already exists')
     }
     const hashedPassword = await this.hashService.hashPassword(password);
     
-    let newUser;
-
-    switch (role) {
-      case Role.Agronomo:
-        if (!this.validateAgronomistDto(createUserDto)) {
-          throw new BadRequestException('Faltan campos requeridos para el rol de Agrónomo');
-        }
-        newUser = new this.userModel({
-          ...createUserDto,
-          password: hashedPassword
-        } as CreateAgronomistDto);
-        break;
-
-      case Role.Agricultor:
-        if (!this.validateFarmerDto(createUserDto)) {
-          throw new BadRequestException('Faltan campos requeridos para el rol de Agricultor');
-        }
-        newUser = new this.userModel({
-          ...createUserDto,
-          password: hashedPassword
-        } as CreateFarmerDto);
-        break;
-
-      case Role.Inversor:
-        if (!this.validateInvestorDto(createUserDto)) {
-          throw new BadRequestException('Faltan campos requeridos para el rol de Inversor');
-        }
-        newUser = new this.userModel({
-          ...createUserDto,
-          password: hashedPassword
-        } as CreateInvestorDto);
-        break;
-
-      default:
-        throw new BadRequestException('Rol no válido');
-    }
+    const newUser = new this.userModel({
+      ...createUserDto,
+      password: hashedPassword
+    });
 
     return newUser.save();
-  }
-  private validateAgronomistDto(dto: CreateUserDto): dto is CreateAgronomistDto {
-    return 'tituloUniversitario' in dto && 'especializacion' in dto;
-  }
 
-  private validateFarmerDto(dto: CreateUserDto): dto is CreateFarmerDto {
-    return 'experiencia' in dto && 'areaTotalCultivable' in dto;
   }
+  async registerFarmer(createFarmerDto: CreateFarmerDto) {
+    const { email,  password } = createFarmerDto;
+    const user = await this.getUserByEmail(email)
+    if(user){
+      throw new BadRequestException('User already exists')
+    }
+    const hashedPassword = await this.hashService.hashPassword(password);
+    
+    const newUser = {
+      ...createFarmerDto,
+      password: hashedPassword
+    };
 
-  private validateInvestorDto(dto: CreateUserDto): dto is CreateInvestorDto {
-    return 'capitalDisponible' in dto && 'areasInteres' in dto;
+    return this.userModel.create(newUser)
+
   }
-  async generateToken(wallet: string): Promise<string> {
+  async registerInversor(createInvestorDto: CreateInvestorDto) {
+    const { email,  password } = createInvestorDto;
+    const user = await this.getUserByEmail(email)
+    if(user){
+      throw new BadRequestException('User already exists')
+    }
+    const hashedPassword = await this.hashService.hashPassword(password);
+    
+    const newUser = new this.userModel({
+      ...createInvestorDto,
+      password: hashedPassword
+    });
+
+    return newUser.save();
+
+  }
+  async registerAgronomist(createAgronomistDto: CreateAgronomistDto) {
+    const { email,  password } = createAgronomistDto;
+    const user = await this.getUserByEmail(email)
+    if(user){
+      throw new BadRequestException('User already exists')
+    }
+    const hashedPassword = await this.hashService.hashPassword(password);
+    
+    const newUser = new this.userModel({
+      ...createAgronomistDto,
+      password: hashedPassword
+    });
+
+    return newUser.save()
+
+  }
+  async generateToken(wallet: string): Promise<object> {
     const token = crypto.randomBytes(16).toString('hex');
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 1);
@@ -94,7 +100,7 @@ export class UsersService {
       { new: true }
     ).exec();
 
-    return token;
+    return {token: token, expiresAt: expiresAt};
   }
   async validateToken( token: string): Promise<boolean> {
     const user = await this.getUserByToken(token);
