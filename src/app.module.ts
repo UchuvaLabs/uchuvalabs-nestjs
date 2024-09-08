@@ -4,6 +4,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import dbConfig from './libs/persistance/db-config';
 import { PersistenceModule } from './libs/persistance';
+import { CropModule } from './crop/crop.module';
 
 
 @Module({
@@ -16,6 +17,7 @@ import { PersistenceModule } from './libs/persistance';
      PersistenceModule,
     UsersModule,
     AuthModule,
+    CropModule,
     
   
     ],

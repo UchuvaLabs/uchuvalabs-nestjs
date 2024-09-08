@@ -1,5 +1,13 @@
 
-import { IsEmail, IsEnum, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+
+export enum Role {
+    Inversor = 'inversor',
+    Agricultor = 'agricultor',
+    Comprador = 'comprador',
+    Agronomo = 'agronomo',
+    Proveedor = 'proveedor'
+  }
 
 export class CreateUserDto {
     @IsString()
@@ -25,5 +33,7 @@ export class CreateUserDto {
     })
     wallet: string;
 
-    
+    @IsOptional() 
+  @IsEnum(Role) 
+  role?: Role;
 }

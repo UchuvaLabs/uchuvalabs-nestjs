@@ -31,16 +31,10 @@ export class User extends Document{
 
     @Prop({
         required: true, 
-        enum: ['inversor', 'minicultivador', 'comprador', 'agronomo', 'proveedor'],
+        enum: ['inversor', 'agricultor', 'comprador', 'agronomo', 'proveedor'],
         default: 'comprador'
     })
     role:string
-
-    @Prop({
-        enum: ['active', 'suspended', 'pending', 'inactive'],
-        default: 'pending'
-    })
-    status: string;
 
     @Prop()
     otp?: string;

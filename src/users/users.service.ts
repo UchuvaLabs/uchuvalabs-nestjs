@@ -1,10 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, Role } from './dto/create-user.dto';
 import * as crypto from 'crypto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './entities/user.entity';
 import { Model } from 'mongoose';
 import { HashService } from './hash.service';
+import { CreateInvestorDto } from './dto/create-investor.dto';
+import { CreateFarmerDto } from './dto/create-farmer.dto';
+import { CreateAgronomistDto } from './dto/create-agronomist.dto';
 
 @Injectable()
 export class UsersService {
@@ -24,19 +27,62 @@ export class UsersService {
     return this.userModel.findOne({ tempToken: token }).exec();
   }
   async register(createUserDto: CreateUserDto) {
-    const { email,  password } = createUserDto;
+    const { email,  password, role } = createUserDto;
     const user = await this.getUserByEmail(email)
     if(user){
       throw new BadRequestException('User already exists')
     }
     const hashedPassword = await this.hashService.hashPassword(password);
-    const newUser = new this.userModel({
-      ...createUserDto,
-      password: hashedPassword
-    });
+    
+    let newUser;
+
+    switch (role) {
+      case Role.Agronomo:
+        if (!this.validateAgronomistDto(createUserDto)) {
+          throw new BadRequestException('Faltan campos requeridos para el rol de Agrónomo');
+        }
+        newUser = new this.userModel({
+          ...createUserDto,
+          password: hashedPassword
+        } as CreateAgronomistDto);
+        break;
+
+      case Role.Agricultor:
+        if (!this.validateFarmerDto(createUserDto)) {
+          throw new BadRequestException('Faltan campos requeridos para el rol de Agricultor');
+        }
+        newUser = new this.userModel({
+          ...createUserDto,
+          password: hashedPassword
+        } as CreateFarmerDto);
+        break;
+
+      case Role.Inversor:
+        if (!this.validateInvestorDto(createUserDto)) {
+          throw new BadRequestException('Faltan campos requeridos para el rol de Inversor');
+        }
+        newUser = new this.userModel({
+          ...createUserDto,
+          password: hashedPassword
+        } as CreateInvestorDto);
+        break;
+
+      default:
+        throw new BadRequestException('Rol no válido');
+    }
 
     return newUser.save();
+  }
+  private validateAgronomistDto(dto: CreateUserDto): dto is CreateAgronomistDto {
+    return 'tituloUniversitario' in dto && 'especializacion' in dto;
+  }
 
+  private validateFarmerDto(dto: CreateUserDto): dto is CreateFarmerDto {
+    return 'experiencia' in dto && 'areaTotalCultivable' in dto;
+  }
+
+  private validateInvestorDto(dto: CreateUserDto): dto is CreateInvestorDto {
+    return 'capitalDisponible' in dto && 'areasInteres' in dto;
   }
   async generateToken(wallet: string): Promise<string> {
     const token = crypto.randomBytes(16).toString('hex');
