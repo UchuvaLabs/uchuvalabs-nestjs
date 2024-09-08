@@ -38,7 +38,12 @@ export class CropService {
     return crop;
   }
   
-  async getAcceptedCrops(): Promise<Crop[]> {
-    return this.cropModel.find({ status: 'aceptado' }).exec();
+  async getAcceptedCrops(page: number = 1, limit: number = 10): Promise<Crop[]> {
+    const skip = (page - 1) * limit;
+    return this.cropModel
+      .find({ status: 'aceptado' })
+      .skip(skip)
+      .limit(limit)
+      .exec();
   }
 }

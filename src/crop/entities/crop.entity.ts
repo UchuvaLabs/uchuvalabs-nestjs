@@ -5,6 +5,9 @@ import { Document, Types } from 'mongoose';
 @Schema({ timestamps: true })
 export class Crop extends Document {
 
+  @Prop()
+  img?:string
+
   @Prop({ required: true, trim: true })
   nombreCultivo: string;
 

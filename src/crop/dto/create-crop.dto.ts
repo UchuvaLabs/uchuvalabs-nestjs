@@ -2,6 +2,10 @@ import { IsDate, IsNotEmpty, IsNumber, IsOptional, IsString, IsArray, IsMongoId 
 
 
 export class CreateCropDto {
+    @IsString()
+    @IsOptional()
+    img:string
+
   @IsNotEmpty()
   @IsString()
   nombreCultivo: string;

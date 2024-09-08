@@ -7,6 +7,7 @@ import {
   Param,
   NotFoundException,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { CropService } from './crop.service';
 import { CreateCropDto } from './dto/create-crop.dto';
@@ -47,7 +48,10 @@ export class CropController {
 
 
   @Get('accepted')
-  async getAcceptedCrops(): Promise<Crop[]> {
-    return await this.cropService.getAcceptedCrops();
-  }
+async getAcceptedCrops(
+  @Query('page') page: number = 1,
+  @Query('limit') limit: number = 10,
+): Promise<Crop[]> {
+  return await this.cropService.getAcceptedCrops(page, limit);
+}
 }
