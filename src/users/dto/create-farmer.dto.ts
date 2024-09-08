@@ -9,6 +9,7 @@ export class CreateFarmerDto extends CreateUserDto {
     @IsArray()
     @IsOptional()
     certificaciones?: string[]; 
+    
     @IsNumber()
     @IsOptional()
     areaTotalCultivable?: number; 

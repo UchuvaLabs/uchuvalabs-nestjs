@@ -19,12 +19,6 @@ export class User extends Document{
 
     @Prop({
         required: true, 
-        minlength: 8 
-    })
-    password:string;
-
-    @Prop({
-        required: true, 
         unique: true 
     })
     wallet: string

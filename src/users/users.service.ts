@@ -27,64 +27,60 @@ export class UsersService {
     return this.userModel.findOne({ tempToken: token }).exec();
   }
   async register(createUserDto: CreateUserDto) {
-    const { email,  password } = createUserDto;
+    const { email } = createUserDto;
     const user = await this.getUserByEmail(email)
     if(user){
       throw new BadRequestException('User already exists')
     }
-    const hashedPassword = await this.hashService.hashPassword(password);
+  
     
     const newUser = new this.userModel({
-      ...createUserDto,
-      password: hashedPassword
+      ...createUserDto
     });
 
     return newUser.save();
 
   }
   async registerFarmer(createFarmerDto: CreateFarmerDto) {
-    const { email,  password } = createFarmerDto;
+    const { email } = createFarmerDto;
     const user = await this.getUserByEmail(email)
     if(user){
       throw new BadRequestException('User already exists')
     }
-    const hashedPassword = await this.hashService.hashPassword(password);
+    
     
     const newUser = {
-      ...createFarmerDto,
-      password: hashedPassword
+      ...createFarmerDto
     };
 
     return this.userModel.create(newUser)
 
   }
   async registerInversor(createInvestorDto: CreateInvestorDto) {
-    const { email,  password } = createInvestorDto;
+    const { email } = createInvestorDto;
     const user = await this.getUserByEmail(email)
     if(user){
       throw new BadRequestException('User already exists')
     }
-    const hashedPassword = await this.hashService.hashPassword(password);
+   
     
     const newUser = new this.userModel({
-      ...createInvestorDto,
-      password: hashedPassword
+      ...createInvestorDto
     });
 
     return newUser.save();
 
   }
   async registerAgronomist(createAgronomistDto: CreateAgronomistDto) {
-    const { email,  password } = createAgronomistDto;
+    const { email } = createAgronomistDto;
     const user = await this.getUserByEmail(email)
     if(user){
       throw new BadRequestException('User already exists')
     }
-    const hashedPassword = await this.hashService.hashPassword(password);
+   
     
     const newUser = new this.userModel({
-      ...createAgronomistDto,
-      password: hashedPassword
+      ...createAgronomistDto
     });
 
     return newUser.save()
@@ -94,13 +90,19 @@ export class UsersService {
     const token = crypto.randomBytes(16).toString('hex');
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 1);
-    await this.userModel.findOneAndUpdate(
+    const user = await this.userModel.findOneAndUpdate(
       { wallet },
       { tempToken: token, tempTokenExpiration: expiresAt },
       { new: true }
     ).exec();
-
-    return {token: token, expiresAt: expiresAt};
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return {
+      token: token,
+      expiresAt: expiresAt,
+      role: user.role 
+    };
   }
   async validateToken( token: string): Promise<boolean> {
     const user = await this.getUserByToken(token);
