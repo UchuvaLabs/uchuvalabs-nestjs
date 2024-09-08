@@ -1,26 +1,23 @@
-import { Injectable } from '@nestjs/common';
-import { RegisterUserDto } from './dto/register-auth.dto';
-import { UpdateAuthDto } from './dto/login-auth.dto';
+import { UsersService } from 'src/users/users.service';
+import { Injectable } from "@nestjs/common";
+import { HashService } from 'src/users/hash.service';
+
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: RegisterUserDto) {
-    return 'This action adds a new auth';
-  }
+    constructor(
+        private userService:UsersService,
+    ){}
 
-  findAll() {
-    return `This action returns all auth`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
-  }
+    async validateUser(wallet: string, otp: string): Promise<any> {
+      const user = await this.userService.getUserByWallet(wallet);
+      if (user) {
+        const otpValid = await this.userService.validateOtp(wallet, otp);
+        if (otpValid) {
+          await this.userService.deleteOtp(wallet);
+          return user;
+        }
+      }
+      return null;
+    }
 }

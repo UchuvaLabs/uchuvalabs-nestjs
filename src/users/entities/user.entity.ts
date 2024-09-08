@@ -52,7 +52,7 @@ export class User extends Document{
     tempToken?: string;
 
     @Prop()
-    tempTokenExpiration?: number;
+    tempTokenExpiration?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)

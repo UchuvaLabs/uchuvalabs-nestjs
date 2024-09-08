@@ -1,34 +1,74 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { Controller, Get, Post, Body, Request, UseGuards, BadRequestException } from '@nestjs/common';
+import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { AuthService } from 'src/auth/auth.service';
+import * as crypto from 'crypto';
+import { MailService } from 'src/mail/mail.service';
+import { TokenAuthGuard } from 'src/Guard/authenticated.guard';
 
-@Controller('users')
+
+
+
+@Controller('user')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly userService: UsersService,
+    private readonly authService: AuthService,
+    private readonly mailService: MailService,
+    
+  ) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+
+  @Post('register')
+  async registerUser(@Body() createUserDto: CreateUserDto) {
+    return this.userService.register(createUserDto);
   }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
+  
+  @Post('generate-otp')
+  async generateOtp(@Body('wallet') wallet: string) {
+    const user = await this.userService.getUserByWallet(wallet);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const otp = await this.userService.generateOtp(wallet);
+
+    await this.mailService.sendOtp(user.email, otp);
+
+    return 'El codigo fue enviado a tu correo, verifica tu bandeja de entrada!';
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  
+  @Post('login')
+  async loginUser(@Body() loginUserDto: LoginUserDto) {
+    const { wallet, otp } = loginUserDto;
+    const isValid = await this.userService.validateOtp(wallet, otp);
+
+    if (isValid) {
+      const token = await this.userService.generateToken(wallet);
+      await this.userService.deleteOtp(wallet); 
+      return { token };
+    } else {
+      return { msg: 'Invalid wallet or OTP' };
+    }
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  @UseGuards(TokenAuthGuard)
+  @Get('info')
+  getUsers(@Request() req) {
+    return {
+      data: req.user
+    }
+  }
+  
+  
+  @Post('logout')
+  logout(@Request() req) {
+    req.logout(() => {
+      return;
+    });
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
-  }
 }

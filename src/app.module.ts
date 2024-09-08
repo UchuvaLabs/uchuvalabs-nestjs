@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import dbConfig from './libs/persistance/db-config';
 import { PersistenceModule } from './libs/persistance';
 
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -14,7 +15,8 @@ import { PersistenceModule } from './libs/persistance';
     }),
      PersistenceModule,
     UsersModule,
-    AuthModule
+    AuthModule,
+    
   
     ],
   controllers: [],
